@@ -22,5 +22,7 @@ public class SelectorRequestDto extends RequestDto {
     private String sessionId;
     private boolean enableHealing;
     private boolean urlKey;
+    @ToString.Exclude
+    private List<ReferenceDataDto> referenceData;
 }
 

@@ -40,4 +40,6 @@ public interface HealingService {
      */
     void saveSuccessHealing(RecordDto.ReportRecord dto);
 
+    String updateSelectorId(String dto);
+
 }

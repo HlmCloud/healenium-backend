@@ -132,6 +132,11 @@ public class HealingServiceImpl implements HealingService {
         }
     }
 
+    @Override
+    public String updateSelectorId(String dto) {
+        return selectorService.getSelectorId(dto, "", "findElement", false);
+    }
+
     private Healing getHealing(HealingRequestDto dto) {
         // build selector key
         String selectorId = selectorService.getSelectorId(dto.getLocator(), dto.getUrl(), dto.getCommand(), urlForKey);

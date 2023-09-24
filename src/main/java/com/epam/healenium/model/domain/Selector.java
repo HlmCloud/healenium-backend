@@ -70,4 +70,10 @@ public class Selector {
     @Column(name = "enable_healing")
     private Boolean enableHealing;
 
+    @Column(name = "table_ref")
+    private String tableRef;
+
+    @Column(name = "table_css_selector")
+    private String tableCssSelector;
+
 }

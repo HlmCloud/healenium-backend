@@ -1,26 +1,13 @@
 package com.epam.healenium.controller;
 
-import com.epam.healenium.model.dto.ConfigSelectorDto;
-import com.epam.healenium.model.dto.HealingDto;
-import com.epam.healenium.model.dto.HealingRequestDto;
-import com.epam.healenium.model.dto.HealingResultDto;
-import com.epam.healenium.model.dto.RecordDto;
-import com.epam.healenium.model.dto.ReferenceElementsDto;
-import com.epam.healenium.model.dto.RequestDto;
-import com.epam.healenium.model.dto.SelectorDto;
-import com.epam.healenium.model.dto.SelectorRequestDto;
-import com.epam.healenium.model.dto.SessionDto;
+import com.epam.healenium.model.dto.*;
 import com.epam.healenium.service.HealingService;
 import com.epam.healenium.service.SelectorService;
+import com.epam.healenium.service.TenantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.validation.Valid;
@@ -39,6 +26,7 @@ public class HealingController {
 
     private final HealingService healingService;
     private final SelectorService selectorService;
+    private final TenantService tenantService;
 
     /**
      * Saving information about a successfully found item
@@ -46,7 +34,8 @@ public class HealingController {
      * @param request
      */
     @PostMapping()
-    public void save(@Valid @RequestBody SelectorRequestDto request) {
+    public void save(@Valid @RequestBody SelectorRequestDto request, @RequestHeader Map<String, String> headers) {
+        tenantService.setCurrentTenant(headers);
         log.info("[Save Elements] Request: {}({})", request.getType(), request.getLocator());
         selectorService.saveSelector(request);
     }
@@ -58,7 +47,8 @@ public class HealingController {
      * @return
      */
     @GetMapping()
-    public ReferenceElementsDto getReferenceElements(RequestDto dto) {
+    public ReferenceElementsDto getReferenceElements(RequestDto dto, @RequestHeader Map<String, String> headers) {
+        tenantService.setCurrentTenant(headers);
         log.info("[Get Reference] Request: {})", dto);
         ReferenceElementsDto referenceElements = selectorService.getReferenceElements(dto);
         log.debug("[Get Reference] Response: {})", referenceElements);
@@ -71,7 +61,8 @@ public class HealingController {
      * @return
      */
     @GetMapping("/elements")
-    public ConfigSelectorDto getElements() {
+    public ConfigSelectorDto getElements(@RequestHeader Map<String, String> headers) {
+        tenantService.setCurrentTenant(headers);
         ConfigSelectorDto configSelectors = selectorService.getConfigSelectors();
         log.debug("[Get Elements] Response: {}", configSelectors);
         return configSelectors;
@@ -87,6 +78,7 @@ public class HealingController {
     @PostMapping("/healing")
     public void save(@Valid @RequestBody List<HealingRequestDto> dto,
                      @RequestHeader Map<String, String> headers) {
+        tenantService.setCurrentTenant(headers);
         log.debug("[Save Healing] Request: {}. Headers: {}", dto, headers);
         if (StringUtils.isEmpty(headers.get(SESSION_KEY_V1)) && StringUtils.isEmpty(headers.get(SESSION_KEY_V2))) {
             log.warn("Session key is not present. Current issue would not be presented in any reports, but still available in replacement!");
@@ -101,7 +93,8 @@ public class HealingController {
      * @return
      */
     @PostMapping("/session")
-    public void session(@Valid @RequestBody SessionDto dto) {
+    public void session(@Valid @RequestBody SessionDto dto, @RequestHeader Map<String, String> headers) {
+        tenantService.setCurrentTenant(headers);
         log.debug("[Restore Session] Request: {}", dto);
     }
 
@@ -112,7 +105,8 @@ public class HealingController {
      * @return
      */
     @GetMapping("/healing")
-    public Set<HealingDto> getHealings(RequestDto dto) {
+    public Set<HealingDto> getHealings(RequestDto dto, @RequestHeader Map<String, String> headers) {
+        tenantService.setCurrentTenant(headers);
         log.debug("[Get Healing] Request: {}", dto);
         Set<HealingDto> healings = healingService.getHealings(dto);
         log.debug("[Get Healing] Response: {}", healings);
@@ -126,7 +120,8 @@ public class HealingController {
      * @return
      */
     @GetMapping("/healing/results")
-    public Set<HealingResultDto> getResults(RequestDto dto) {
+    public Set<HealingResultDto> getResults(RequestDto dto, @RequestHeader Map<String, String> headers) {
+        tenantService.setCurrentTenant(headers);
         log.debug("[Get Healing Result] Request: {}", dto);
         Set<HealingResultDto> healingResults = healingService.getHealingResults(dto);
         log.debug("[Get Healing Result] Response: {}", healingResults);
@@ -140,7 +135,8 @@ public class HealingController {
      * @return
      */
     @PostMapping("/healing/success")
-    public void successHealing(@Valid @RequestBody RecordDto.ReportRecord dto) {
+    public void successHealing(@Valid @RequestBody RecordDto.ReportRecord dto, @RequestHeader Map<String, String> headers) {
+        tenantService.setCurrentTenant(headers);
         log.debug("[Set Healing Status] Request: {}", dto);
         healingService.saveSuccessHealing(dto);
     }
@@ -151,7 +147,8 @@ public class HealingController {
      * @return
      */
     @GetMapping("/selectors")
-    public ModelAndView get() {
+    public ModelAndView get(@RequestHeader Map<String, String> headers) {
+        tenantService.setCurrentTenant(headers);
         log.debug("[Get Selector Page]");
         ModelAndView modelAndView = new ModelAndView();
         modelAndView.setViewName("selector");
@@ -166,13 +163,15 @@ public class HealingController {
      * @return
      */
     @PostMapping("/selector/status")
-    public void setSelectorStatus(@Valid @RequestBody SelectorDto dto) {
+    public void setSelectorStatus(@Valid @RequestBody SelectorDto dto, @RequestHeader Map<String, String> headers) {
+        tenantService.setCurrentTenant(headers);
         log.debug("[Set Selector Status] Request: {}", dto);
         selectorService.setSelectorStatus(dto);
     }
 
     @GetMapping("/migrate")
-    public ModelAndView migrate() {
+    public ModelAndView migrate(@RequestHeader Map<String, String> headers) {
+        tenantService.setCurrentTenant(headers);
         log.debug("[Migrate Selectors]");
         selectorService.migrate();
         ModelAndView modelAndView = new ModelAndView();
@@ -181,4 +180,19 @@ public class HealingController {
         return modelAndView;
     }
 
+    @PostMapping("/getId")
+    public String updateSelectorId(@Valid @RequestParam String selector, @RequestHeader Map<String, String> headers) {
+        tenantService.setCurrentTenant(headers);
+        return healingService.updateSelectorId(selector);
+    }
+
+    @GetMapping("/tenant/{schema}")
+    public void addTenant(@PathVariable String schema) {
+        tenantService.addTenant(schema);
+    }
+
+    @DeleteMapping("/tenant/{schema}")
+    public void deleteTenant(@PathVariable String schema) {
+        tenantService.deleteTenant(schema);
+    }
 }

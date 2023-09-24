@@ -3,11 +3,13 @@ package com.epam.healenium.mapper;
 import com.epam.healenium.constants.Constants;
 import com.epam.healenium.model.Locator;
 import com.epam.healenium.model.domain.Selector;
+import com.epam.healenium.model.dto.ReferenceDataDto;
 import com.epam.healenium.model.dto.RequestDto;
 import com.epam.healenium.model.dto.SelectorDto;
 import com.epam.healenium.model.dto.SelectorRequestDto;
 import com.epam.healenium.model.wrapper.NodePathWrapper;
 import com.epam.healenium.util.Utils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
@@ -15,6 +17,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface SelectorMapper {
@@ -32,6 +36,13 @@ public interface SelectorMapper {
         element.setEnableHealing(existSelector
                 .map(Selector::getEnableHealing)
                 .orElseGet(() -> "findElement".equals(dto.getCommand())));
+        List<ReferenceDataDto> referenceData = dto.getReferenceData();
+        if (referenceData != null) {
+            List<String> tables = referenceData.stream().map(ReferenceDataDto::getTable).collect(Collectors.toList());
+            List<String> tableCssSelectors = referenceData.stream().map(ReferenceDataDto::getTableCssSelector).collect(Collectors.toList());
+            element.setTableRef(CollectionUtils.isEmpty(tables) ? null : tables.get(0));
+            element.setTableCssSelector(CollectionUtils.isEmpty(tableCssSelectors) ? null : tableCssSelectors.get(0));
+        }
         return element;
     }
 

@@ -65,11 +65,14 @@ public class SelectorServiceImpl implements SelectorService {
     @Override
     public ReferenceElementsDto getReferenceElements(RequestDto dto) {
         String selectorId = getSelectorId(dto.getLocator(), dto.getUrl(), dto.getCommand(), urlForKey);
-        List<List<Node>> paths = selectorRepository.findById(selectorId)
+        Optional<Selector> selectorOptional = selectorRepository.findById(selectorId);
+        List<List<Node>> paths = selectorOptional
                 .map(t -> t.getNodePathWrapper().getNodePath())
                 .orElse(Collections.emptyList());
         return new ReferenceElementsDto()
-                .setPaths(paths);
+                .setPaths(paths)
+                .setTable(selectorOptional.map(Selector::getTableRef).orElse(null))
+                .setTableCssSelector(selectorOptional.map(Selector::getTableCssSelector).orElse(null));
     }
 
     @Override
@@ -140,7 +143,7 @@ public class SelectorServiceImpl implements SelectorService {
             request.setNodePath(nodes);
             log.debug("[Save Elements] Parse Node size: {}", nodes.size());
         } catch (Exception e) {
-            log.error("[Save Elements] Error during parseNodePath. Message: {} Ex: {}", e.getMessage(), e);
+            log.error("[Save Elements] Error during parseNodePath. Ex: ", e);
         }
     }
 

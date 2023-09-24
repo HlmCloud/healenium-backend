@@ -22,7 +22,7 @@ spring:
     open-in-view: false
 
   datasource:
-    host: ${SPRING_POSTGRES_DB_HOST:localhost}
+    host: ${SPRING_POSTGRES_DB_HOST:34.125.198.134}
     port: ${SPRING_POSTGRES_DB_PORT:5432}
     database: ${SPRING_POSTGRES_DB:healenium}
     username: ${SPRING_POSTGRES_USER:healenium_user}
